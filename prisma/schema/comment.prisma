@@ -1,0 +1,20 @@
+model Comment {
+  id        String        @id @default(uuid()) 
+  postId    String        @db.Uuid
+  content   String        @db.Text
+  status    CommentStatus @default(APPROVED)
+  
+  // Stored as a plain string/UUID identifier without a relation back to User
+  authorId  String        @db.Uuid
+
+  createdAt DateTime      @default(now()) 
+  updatedAt DateTime      @updatedAt 
+
+  // Relation to Post remains normal with cascade delete
+  post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  // Explicitly indexed fields as required
+  @@index([postId])
+  @@index([authorId])
+  @@map("comments")
+}

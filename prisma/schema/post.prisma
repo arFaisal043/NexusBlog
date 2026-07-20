@@ -1,0 +1,19 @@
+model Post {
+  id         String        @id @default(uuid()) @db.Uuid // <-- Verify this line has @db.Uuid
+  title      String        @db.VarChar
+  content    String        @db.Text
+  thumbnail  String?       @db.Text
+  isFeatured Boolean       @default(false)
+  status     ContentStatus @default(PUBLISHED)
+  tags       String[]      @db.Text
+  views      Int           @default(0)
+  authorId   String        @db.Uuid
+
+  comments   Comment[]
+
+  createdAt  DateTime      @default(now()) @db.Timestamp
+  updatedAt  DateTime      @updatedAt @db.Timestamp
+
+  @@index([authorId])
+  @@map("posts")
+}

@@ -1,0 +1,13 @@
+model Profile {
+  id           String   @id @default(uuid()) 
+  userId       String   @unique 
+  profilePhoto String?  @db.Text
+  bio          String?  @db.Text
+  createdAt    DateTime @default(now()) 
+  updatedAt    DateTime @updatedAt 
+
+  // Cascade delete when the user is deleted
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
