@@ -31,16 +31,21 @@ const registerUserService = async (payload: registerInterface) => {
       name,
       email,
       password: hashPass,
+      profile: {
+        create: {
+            profilePhoto
+        }
+      }
     },
   });
 
   // create users profile
-  await prisma.profile.create({
-    data: {
-      userId: createdUser.id,
-      profilePhoto,
-    },
-  });
+//   await prisma.profile.create({
+//     data: {
+//       userId: createdUser.id,
+//       profilePhoto,
+//     },
+//   });
 
   // create user to insert into db
   const user = await prisma.user.findUnique({

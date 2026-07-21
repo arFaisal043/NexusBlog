@@ -1,26 +1,14 @@
 import { Request, Response } from "express";
 import httpStatus from "http-status";
 import { authService } from "./user.service";
+import { catchAsync } from "../../utils/catchAsync";
+import { sendSuccess } from "../../utils/response";
 
-const registerUser = async (req: Request, res: Response) => {
-    try {
-        const user = await authService.registerUserService(req.body);
+const registerUser = catchAsync(async (req: Request, res: Response) => {
+    const user = await authService.registerUserService(req.body);
+    sendSuccess(res, httpStatus.CREATED, "User registered successfully!", user);
+})
 
-        res.status(httpStatus.CREATED).json({
-          success: true,
-          message: "User Registered Successfully!",
-          data: {
-            user,
-          },
-        });
-    } catch (error) {
-        res.status(httpStatus.CREATED).json({
-          success: false,
-          message: "User are not Registered Successfully!",
-          error: (error as Error).message
-        });
-    }
-};
 
 export const authController = {
   registerUser,

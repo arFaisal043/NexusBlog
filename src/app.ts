@@ -6,7 +6,7 @@ import httpStatus from "http-status";
 import { prisma } from "./lib/prisma";
 import bcrypt from "bcryptjs";
 import { authRoutes } from "./modules/user/user.route";
-
+import { globalErrorHandler } from "./middleware/globalErrorHandler";
 
 const app: Application = express();
 
