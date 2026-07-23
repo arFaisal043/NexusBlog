@@ -7,10 +7,12 @@ type TMeta = {
 }
 
 export const sendSuccess = ( res: Response, statusCode: number, message: string, data?: any, metaData?: TMeta) => {
-  res.status(statusCode).json({ success: true, message, data});
+  res.status(statusCode).json({ 
+    success: true, message, data
+  });
 };
 
-// - No need this function, bcz globalErrorHandler.ts handling all the error responses for the entire application
+// --- No need this function, bcz globalErrorHandler.ts handling all the error responses for the entire application
 // export const sendError = ( res: Response, statusCode: number, message: string, errors?: any) => {
 //   res.status(statusCode).json({ success: false, message, errors});
 // };

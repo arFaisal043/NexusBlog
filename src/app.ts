@@ -2,11 +2,11 @@ import express, { Application, Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { config } from "./config";
-import httpStatus from "http-status";
 import { prisma } from "./lib/prisma";
 import bcrypt from "bcryptjs";
-import { authRoutes } from "./modules/user/user.route";
+import { userRoutes } from "./modules/user/user.route";
 import { globalErrorHandler } from "./middleware/globalErrorHandler";
+import { authRoutes } from "./modules/auth/auth.route";
 
 const app: Application = express();
 
@@ -39,6 +39,9 @@ app.get("/", (req: Request, res: Response) => {
 
 // prefix for auth api
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
 
+// Use global error handler (Must be placed after all routes)
+app.use(globalErrorHandler);
 
 export default app;

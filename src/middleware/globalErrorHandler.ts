@@ -12,3 +12,9 @@ export const globalErrorHandler = (
     message: err.message || "Internal Server Error",
   });
 };
+
+
+/*
+// Use global error handler in app.ts (Must be placed after all routes)
+app.use(globalErrorHandler);
+*/

@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../../lib/prisma";
 import { config } from "../../config";
 import { registerInterface } from "./user.interface";
+import { CustomError } from "../../utils/customError";
+import statusCode from "http-status";
 
 const registerUserService = async (payload: registerInterface) => {
   const { name, password, email, profilePhoto } = payload;
@@ -16,7 +18,7 @@ const registerUserService = async (payload: registerInterface) => {
   });
 
   if (isUserExist) {
-    throw new Error("User is already exist!");
+    throw new CustomError("User is already exist!", statusCode.BAD_REQUEST);
   }
 
   // _________ Hash password -> env return string
@@ -66,6 +68,6 @@ const registerUserService = async (payload: registerInterface) => {
 };
 
 
-export const authService = {
+export const userService = {
   registerUserService,
 };

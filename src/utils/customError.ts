@@ -7,3 +7,8 @@ export class CustomError extends Error {
     Object.setPrototypeOf(this, CustomError.prototype);
   }
 }
+
+
+/* why we use custom error here?
+- throw new error just return a msg, can not throw with status code.
+*/
