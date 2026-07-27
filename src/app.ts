@@ -39,7 +39,7 @@ app.get("/", (req: Request, res: Response) => {
 
 // prefix for auth api
 app.use("/api/auth", authRoutes);
-app.use("/api/user", userRoutes);
+app.use("/api/users", userRoutes);
 
 // Use global error handler (Must be placed after all routes)
 app.use(globalErrorHandler);

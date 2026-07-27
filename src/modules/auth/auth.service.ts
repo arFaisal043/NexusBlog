@@ -36,7 +36,7 @@ const loginUserService = async (credentials: ILoginUser) => {
     );
   }
 
-  // _______ check 3: Compare password by bcrypt compare
+  // _______ check 3: Compare password by bcrypt-compare
   const isPasswordMatch = await bcrypt.compare(password, user.password);
 
   if (!isPasswordMatch) {
