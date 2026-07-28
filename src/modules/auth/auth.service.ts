@@ -36,6 +36,13 @@ const loginUserService = async (credentials: ILoginUser) => {
     );
   }
 
+  // If account is blocked or inactive
+  if (user.activeStatus === "INACTIVE") {
+    throw new Error(
+      "Your account has been blocked. Please contact with our support team.",
+    );
+  }
+
   // _______ check 3: Compare password by bcrypt-compare
   const isPasswordMatch = await bcrypt.compare(password, user.password);
 
