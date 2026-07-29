@@ -17,4 +17,10 @@ router.post("/register", userController.registerUser);
 
 router.get("/me", authMiddleware(Role.ADMIN, Role.USER, Role.AUTHOR), userController.getMyProfile);
 
+router.put("/my-profile", 
+    authMiddleware(Role.ADMIN, Role.USER, Role.AUTHOR), 
+    userController.updateMyProfile
+);
+
+
 export const userRoutes = router;
