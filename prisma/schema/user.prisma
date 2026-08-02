@@ -11,5 +11,8 @@ model User {
     // 1-to-1 Relation with Profile
     profile      Profile?
     
+    // 1-to-Many Relation with Post
+    posts        Post[]
+
     @@map("users")
 }

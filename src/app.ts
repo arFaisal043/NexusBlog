@@ -7,6 +7,8 @@ import bcrypt from "bcryptjs";
 import { userRoutes } from "./modules/user/user.route";
 import { globalErrorHandler } from "./middleware/globalErrorHandler";
 import { authRoutes } from "./modules/auth/auth.route";
+import { postRoutes } from "./modules/post/post.routes";
+import { commentsRoutes } from "./modules/comment/comment.routes";
 
 const app: Application = express();
 
@@ -40,6 +42,9 @@ app.get("/", (req: Request, res: Response) => {
 // prefix for auth api
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/posts", postRoutes);
+app.use("/api/comments", commentsRoutes);
+
 
 // Use global error handler (Must be placed after all routes)
 app.use(globalErrorHandler);

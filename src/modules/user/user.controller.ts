@@ -14,7 +14,7 @@ const registerUser = catchAsync(async (req: Request, res: Response, next:NextFun
 })
 
 const getMyProfile = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const profile = await userService.getMyProfileFromDB(req.user?.id);
+  const profile = await userService.getMyProfileFromDB(req.user?.id as string);
   sendSuccess(res, statusCode.OK, "User profile fetched successfully!", profile);
 })
 

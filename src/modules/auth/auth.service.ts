@@ -3,9 +3,9 @@ import { prisma } from "../../lib/prisma";
 import { CustomError } from "../../utils/customError";
 import { ILoginUser } from "./auth.interface";
 import statusCode from "http-status";
-import jwt, { SignOptions } from "jsonwebtoken";
+import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
 import { config } from "../../config";
-import { createToken } from "../../utils/jwt";
+import { createToken, verifyToken } from "../../utils/jwt";
 
 /*  _______ Verify User
     check 1: User give email and password or not?
@@ -94,6 +94,53 @@ const loginUserService = async (credentials: ILoginUser) => {
   };
 };
 
+const refreshTokenService = async (refreshToken: string) => {
+  // __________ 1. if client's doesn't has refresh token in cookies
+  if (!refreshToken) {
+    throw new Error("Refresh token is required");
+  }
+  // _________ 2. refresh token verify
+  const decode = verifyToken(refreshToken, config.refreshSecret as string);
+
+  if (!decode.success) {
+    throw new Error("Refresh token is not verified...");
+  }
+
+  // _________ 3. user exist or not? and activity check
+  const { id } = decode.data as JwtPayload;
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { id }
+  });
+
+  if (!user) {
+    throw new Error("User not found!");
+  }
+
+  // ___________ 4. Check user is blocked or active user
+  if (user.activeStatus === "INACTIVE") {
+    throw new Error(
+      "Your account has been blocked. Please contact with our support team.",
+    );
+  }
+
+  // ___________ 5. Create new access token using refresh token
+  const payload = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
+
+  const accessToken = createToken(
+    payload,
+    config.secret as string,
+    config.expiresIn as SignOptions,
+  );
+
+  return { accessToken };
+};;
+
 export const authService = {
   loginUserService,
+  refreshTokenService,
 };

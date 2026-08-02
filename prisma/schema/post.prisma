@@ -8,7 +8,7 @@ model Post {
   tags       String[]      @db.Text
   views      Int           @default(0)
   authorId   String        @db.Uuid
-
+  author     User          @relation(fields: [authorId], references: [id])
   comments   Comment[]
 
   createdAt  DateTime      @default(now()) @db.Timestamp

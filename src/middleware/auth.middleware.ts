@@ -8,8 +8,8 @@ import { JwtPayload } from "jsonwebtoken";
 import { prisma } from "../lib/prisma";
 import { NextFunction, Request, Response } from "express";
 
-// auth(Role.ADMIN, Role.USER, Role.AUTHOR)
-// auth() ==> ...userRoleList ==> [Role.ADMIN, Role.USER, Role.AUTHOR]
+// authMiddleware(Role.ADMIN, Role.USER, Role.AUTHOR)
+// authMiddleware() ==> ...userRoleList ==> [Role.ADMIN, Role.USER, Role.AUTHOR]
 
 export const authMiddleware = (...userRoleList: Role[]) => {
 
