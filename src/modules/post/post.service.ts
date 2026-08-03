@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import { ICreatePostPayload } from "./post.interface";
+import { ICreatePostPayload, IUpdatePostPayload } from "./post.interface";
 
 const createPost = async (payload: ICreatePostPayload, userId: string) => {
     const result = await prisma.post.create({
@@ -64,13 +64,58 @@ const getPostsById = async (postId: string) => {
     where: {
       id: postId,
     },
+    include: {
+      author: {
+        omit: {
+          password: true,
+        },
+      },
+      comments: true,
+      // find how many comments has
+      _count: {
+        select: {
+          comments: true,
+        },
+      },
+    },
   });
 
   return post;
 };
 
+const updatePost = async (postId: string, payload: IUpdatePostPayload) => {
+  // is post exist?
+  const post = await prisma.post.findUniqueOrThrow({
+    where: {
+      id: postId
+    }
+  })
 
-const updatePost = async () => {}
+  // update based on users payload
+  const result = await prisma.post.update({
+    where: {
+      id: postId,
+    },
+    data: payload,
+    include: {
+      author: {
+        omit: {
+          password: true,
+        },
+      },
+      comments: true,
+      // find how many comments has
+      _count: {
+        select: {
+          comments: true,
+        },
+      },
+    },
+  });
+
+  return result;
+};
+
 const deletePost = async () => {}
 const getPostStats = async () => {}
 

@@ -28,9 +28,17 @@ const getPostsById = catchAsync(async (req: Request, res: Response, next: NextFu
   sendSuccess( res, statusCode.OK, "Post retrieve successfully!", result);
 });
 
+const updatePost = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const id = req.params.postId as string;
+  const payload = req.body;
+  const result = await postService.updatePost(id, payload);
+  sendSuccess(res, statusCode.OK, "Post updated successfully!", result);
+});
 
-const updatePost = catchAsync(async (req: Request, res: Response, next: NextFunction) => {});
-const deletePost = catchAsync(async (req: Request, res: Response, next: NextFunction) => {});
+const deletePost = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  
+});
+
 const getPostStats = catchAsync(async (req: Request, res: Response, next: NextFunction) => {});
 
 export const postController = {
