@@ -26,7 +26,16 @@ const getCommentByAuthorId = async (authorId: string) => {
     return comment;
 };
 
-const getCommentByCommentId = async () => {};
+const getCommentByCommentId = async (commentId: string) => {
+    const comment = await prisma.comment.findUnique({
+        where: {
+            id: commentId
+        }
+    })
+
+    return comment;
+};
+
 const updateComment = async () => {};
 const deleteComment = async () => {};
 const moderateComment = async () => {};
