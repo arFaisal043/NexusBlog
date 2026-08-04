@@ -11,21 +11,21 @@ const createComment = catchAsync(async (req: Request, res: Response, next: NextF
     sendSuccess(res, statusCode.CREATED, "Comment created successfully!", result);
 })
 
-const getCommentByAuthorID = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+const getCommentByAuthorId = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const authorId = req.params.authorId as string;
-    const result = await commentServices.getCommentByAuthorID(authorId);
+    const result = await commentServices.getCommentByAuthorId(authorId);
     sendSuccess( res, statusCode.CREATED, "Comment created successfully!", result);
 })
 
-const getCommentByCommentID = catchAsync(async (req: Request, res: Response, next: NextFunction) => {})
+const getCommentByCommentId = catchAsync(async (req: Request, res: Response, next: NextFunction) => {})
 const updateComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {})
 const deleteComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {})
 const moderateComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {})
 
 export const commentController = {
     createComment,
-    getCommentByAuthorID,
-    getCommentByCommentID,
+    getCommentByAuthorId,
+    getCommentByCommentId,
     updateComment,
     deleteComment,
     moderateComment
