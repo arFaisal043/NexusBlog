@@ -30,7 +30,12 @@ const updateComment = catchAsync(async (req: Request, res: Response, next: NextF
     sendSuccess(res, statusCode.OK, "Comment updated successfully!", result);
 })
 
-const deleteComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {})
+const deleteComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const commentId = req.params.commentId as string;
+    const result = await commentServices.deleteComment(commentId);
+    sendSuccess(res, statusCode.OK, "Comment deleted successfully!", result);
+})
+
 const moderateComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {})
 
 export const commentController = {

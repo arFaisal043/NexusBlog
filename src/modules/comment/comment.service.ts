@@ -47,7 +47,16 @@ const updateComment = async (payload: IUpdateCommentPayload, commentId: string) 
     return update;
 };
 
-const deleteComment = async () => {};
+const deleteComment = async (commentId: string) => {
+    const result = await prisma.comment.delete({
+        where: {
+            id: commentId
+        }
+    })
+
+    return result;
+};
+
 const moderateComment = async () => {};
 
 export const commentServices = {
