@@ -23,7 +23,13 @@ const getCommentByCommentId = catchAsync(async (req: Request, res: Response, nex
     sendSuccess(res, statusCode.OK, "Comment fetches successfully!", result);
 })
 
-const updateComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {})
+const updateComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const commentId = req.params.commentId as string;
+    const payload = req.body;
+    const result = await commentServices.updateComment(payload, commentId);
+    sendSuccess(res, statusCode.OK, "Comment updated successfully!", result);
+})
+
 const deleteComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {})
 const moderateComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {})
 
