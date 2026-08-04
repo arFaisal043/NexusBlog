@@ -1,3 +1,4 @@
+import { CommentStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { ICreatePostPayload, IUpdatePostPayload } from "./post.interface";
 
@@ -20,7 +21,12 @@ const getAllPosts = async () => {
             password: true
           }
         },
-        comments: true
+        // comments: true --> shows all comments
+        comments: {
+          where: {
+            status: CommentStatus.APPROVED // only shows approved comment
+          }
+        }
       },
       orderBy: {
         createdAt: "desc"
@@ -46,7 +52,12 @@ const getMyPosts = async (userId: string) => {
           password: true
         }
       },
-      comments: true,
+      // comments: true --> shows all comments
+      comments: {
+        where: {
+          status: CommentStatus.APPROVED // only shows approved comment
+        }
+      },
       // find how many comments has
       _count: {
         select: {
@@ -70,7 +81,11 @@ const getPostsById = async (postId: string) => {
           password: true,
         },
       },
-      comments: true,
+      comments: {
+        where: {
+          status: CommentStatus.APPROVED
+        }
+      },
       // find how many comments has
       _count: {
         select: {
@@ -103,7 +118,11 @@ const updatePost = async (postId: string, payload: IUpdatePostPayload) => {
           password: true,
         },
       },
-      comments: true,
+      comments: {
+        where: {
+          status: CommentStatus.APPROVED
+        }
+      },
       // find how many comments has
       _count: {
         select: {
@@ -116,7 +135,22 @@ const updatePost = async (postId: string, payload: IUpdatePostPayload) => {
   return result;
 };
 
-const deletePost = async () => {}
+const deletePost = async (postId: string) => {
+  // is post exist?
+  const post = await prisma.post.findUniqueOrThrow({
+    where: {
+      id: postId
+    }
+  })
+
+  // delete the post
+  const result = await prisma.post.delete({
+    where: {
+      id: postId
+    }
+  })
+}
+
 const getPostStats = async () => {}
 
 export const postService = {

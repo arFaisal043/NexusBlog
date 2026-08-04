@@ -1,11 +1,26 @@
+import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
+import { commentServices } from "./comment.service";
+import { sendSuccess } from "../../utils/response";
+import statusCode from "http-status";
 
-const createComment = catchAsync(async () => {})
-const getCommentByAuthorID = catchAsync(async () => {})
-const getCommentByCommentID = catchAsync(async () => {})
-const updateComment = catchAsync(async () => {})
-const deleteComment = catchAsync(async () => {})
-const moderateComment = catchAsync(async () => {})
+const createComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const payload = req.body;
+    const authorId = req.user?.id as string;
+    const result = await commentServices.createComment(payload, authorId);
+    sendSuccess(res, statusCode.CREATED, "Comment created successfully!", result);
+})
+
+const getCommentByAuthorID = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const authorId = req.params.authorId as string;
+    const result = await commentServices.getCommentByAuthorID(authorId);
+    sendSuccess( res, statusCode.CREATED, "Comment created successfully!", result);
+})
+
+const getCommentByCommentID = catchAsync(async (req: Request, res: Response, next: NextFunction) => {})
+const updateComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {})
+const deleteComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {})
+const moderateComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {})
 
 export const commentController = {
     createComment,
