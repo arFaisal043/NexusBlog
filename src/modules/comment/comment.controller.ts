@@ -36,7 +36,13 @@ const deleteComment = catchAsync(async (req: Request, res: Response, next: NextF
     sendSuccess(res, statusCode.OK, "Comment deleted successfully!", result);
 })
 
-const moderateComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {})
+const moderateComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const isAdmin = req.user?.role as string;
+    const commentId = req.params.commentId as string;
+    const status = req.body;
+    const result = await commentServices.moderateComment(commentId, isAdmin, status);
+    sendSuccess(res, statusCode.OK, "Comment moderated successfully!", result);
+})
 
 export const commentController = {
     createComment,

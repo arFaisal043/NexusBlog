@@ -6,7 +6,7 @@ import { CustomError } from "../../utils/customError";
 import statusCode from "http-status";
 
 const registerUserService = async (payload: registerInterface) => {
-  const { name, password, email, profilePhoto } = payload;
+  const { name, password, email, profilePhoto, role } = payload;
 
   if (!email) {
     console.log("Email is required");
@@ -33,21 +33,22 @@ const registerUserService = async (payload: registerInterface) => {
       name,
       email,
       password: hashPass,
+      role,
       profile: {
         create: {
-            profilePhoto
+          profilePhoto
         }
       }
     },
   });
 
   // create users profile
-//   await prisma.profile.create({
-//     data: {
-//       userId: createdUser.id,
-//       profilePhoto,
-//     },
-//   });
+  //   await prisma.profile.create({
+  //     data: {
+  //       userId: createdUser.id,
+  //       profilePhoto,
+  //     },
+  //   });
 
   // create user to insert into db
   const user = await prisma.user.findUnique({
@@ -69,7 +70,7 @@ const registerUserService = async (payload: registerInterface) => {
 
 const getMyProfileFromDB = async (userID: string) => {
   const user = await prisma.user.findFirstOrThrow({
-    where: {id: userID},
+    where: { id: userID },
     omit: {
       password: true
     },
@@ -82,28 +83,29 @@ const getMyProfileFromDB = async (userID: string) => {
 }
 
 const updateMyProfileIntoDB = async (userID: string, payload: any) => {
-    const { name, profilePhoto, bio } = payload;
+  const { name, profilePhoto, bio, role } = payload;
 
-    const updatedUser = await prisma.user.update({
-      where: {id: userID},
-      data: {
-        name,
-        profile: {
-          update: {
-            profilePhoto,
-            bio
-          }
+  const updatedUser = await prisma.user.update({
+    where: { id: userID },
+    data: {
+      name,
+      role,
+      profile: {
+        update: {
+          profilePhoto,
+          bio
         }
-      },
-      omit: {
-        password: true
-      },
-      include: {
-        profile: true
       }
-    })
+    },
+    omit: {
+      password: true
+    },
+    include: {
+      profile: true
+    }
+  })
 
-    return updatedUser;
+  return updatedUser;
 }
 
 export const userService = {
