@@ -25,8 +25,15 @@ const updateMyProfile = catchAsync(async (req: Request, res: Response, next: Nex
   sendSuccess(res, statusCode.OK, "User profile updated successfully!", updatedProfile);
 })
 
+const deleteUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const id = req.params.id as string;
+  const deletedUser = await userService.deleteUserFromDB(id);
+  sendSuccess(res, statusCode.OK, "User deleted successfully!", deletedUser);
+})
+
 export const userController = {
   registerUser,
   getMyProfile,
   updateMyProfile,
+  deleteUser,
 };

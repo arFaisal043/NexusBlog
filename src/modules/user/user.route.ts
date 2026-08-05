@@ -22,5 +22,7 @@ router.put("/my-profile",
     userController.updateMyProfile
 );
 
+router.delete("/:id", authMiddleware(Role.ADMIN), userController.deleteUser);
+
 
 export const userRoutes = router;

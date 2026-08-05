@@ -108,8 +108,19 @@ const updateMyProfileIntoDB = async (userID: string, payload: any) => {
   return updatedUser;
 }
 
+const deleteUserFromDB = async (userId: string) => {
+  const result = await prisma.user.delete({
+    where: { 
+      id: userId 
+    }
+  });
+  
+  return result;
+}
+
 export const userService = {
   registerUserService,
   getMyProfileFromDB,
   updateMyProfileIntoDB,
+  deleteUserFromDB,
 };
