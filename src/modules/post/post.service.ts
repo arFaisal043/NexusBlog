@@ -1,6 +1,6 @@
 import { CommentStatus, ContentStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
-import { ICreatePostPayload, IUpdatePostPayload } from "./post.interface";
+import { ICreatePostPayload, IPostQueryOptions, IUpdatePostPayload } from "./post.interface";
 
 const createPost = async (payload: ICreatePostPayload, userId: string) => {
     const result = await prisma.post.create({
@@ -13,28 +13,130 @@ const createPost = async (payload: ICreatePostPayload, userId: string) => {
     return result;
 };
 
-const getAllPosts = async () => {
+//__________ Searching in getAllPosts API -> api/posts?title=AI&tag=AI&sort=popular&page=1&limit=4
+const getAllPosts = async (queryOptions: IPostQueryOptions) => {
+    const { search, tag, sort, page, limit } = queryOptions;
+
+    // Pagination variable
+    const pageNumber = parseInt(page as string) || 1;
+    const limitNumber = parseInt(limit as string) || 5;
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const where: any = {};
+
+    if(search) {
+      where.OR = [
+        { 
+          title: { contains: search as string, mode: "insensitive" } 
+        },
+        { 
+          content: { contains: search as string, mode: "insensitive" } 
+        },
+      ];
+    }
+
+    const filterTag = tag;
+    if(filterTag) {
+      where.tags = {
+        has: filterTag as string,
+      };
+    }
+
+
+    let orderBy: any = { createdAt: "desc" };
+
+    if(sort === "popular") {
+      orderBy = { views: "desc" };
+    } 
+    else if(sort === "latest") {
+      orderBy = { createdAt: "desc" };
+    }
+
     const allPost = await prisma.post.findMany({
+      where,
       include: {
         author: {
           omit: {
-            password: true
-          }
+            password: true,
+          },
         },
-        // comments: true --> shows all comments
         comments: {
           where: {
-            status: CommentStatus.APPROVED // only shows approved comment
-          }
-        }
+            status: CommentStatus.APPROVED, 
+          },
+        },
       },
-      orderBy: {
-        createdAt: "desc"
-      }
+      orderBy,
+      // pagination
+      take: limitNumber,
+      skip,
     });
 
-    return allPost;
+    const total = await prisma.post.count({ where });
+
+    return {
+      meta: {
+        total,
+        page: pageNumber,
+        limit: limitNumber,
+        totalPages: Math.ceil(total / limitNumber),
+      },
+      data: allPost,
+    };
 }
+
+const postSearchService = async () => {
+  const posts = await prisma.post.findMany({
+    // ________ Searching __________________________
+
+    // where: {
+    //   title: "My Fourth Blog Post",
+    //   //content: "This is the full content of my blog post..."
+    // },
+
+    // // ________ Exact Searching __________________________
+    // where: {
+    //   AND: [
+    //     {
+    //       title: "My Fourth Blog Post", // Case sensitive
+    //     },
+    //     {
+    //       content: "This is the full content of my blog post...",
+    //     },
+    //   ],
+    // },
+
+    // // ________ Partial Searching __________________________
+    where: {
+      OR: [
+        {
+          title: {
+            contains: "My Fou",
+            mode: "insensitive", // Not Case sensitive
+          },
+        },
+        {
+          content: {
+            contains: "This is the full content of my blog post",
+            mode: "insensitive",
+          },
+        },
+      ],
+    },
+    include: {
+      author: {
+        omit: {
+          password: true,
+        },
+      }
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return posts;
+};
 
 const getMyPosts = async (userId: string) => {
   const post = await prisma.post.findMany({
@@ -173,58 +275,120 @@ const getPostStats = async () => {
     // we use Transaction , because here have multiple query and all are required. if any failed it may can Big errors
     const transactionResult = await prisma.$transaction(async (tx) => {
         // ALL STATISTICAL DATA
-        const totalPosts = await tx.post.count();
+        // const totalPosts = await tx.post.count();
 
-        const totalPublishedPosts = await tx.post.count({
-          where: {
-            status: ContentStatus.PUBLISHED
-          }
-        });
+        // const totalPublishedPosts = await tx.post.count({
+        //   where: {
+        //     status: ContentStatus.PUBLISHED
+        //   }
+        // });
 
-        const totalDraftPosts = await tx.post.count({
-          where: {
-            status: ContentStatus.DRAFT
-          },
-        });
+        // const totalDraftPosts = await tx.post.count({
+        //   where: {
+        //     status: ContentStatus.DRAFT
+        //   },
+        // });
 
-        const totalArchivedPosts = await tx.post.count({
-          where: {
-            status: ContentStatus.ARCHIVED
-          },
-        });
+        // const totalArchivedPosts = await tx.post.count({
+        //   where: {
+        //     status: ContentStatus.ARCHIVED
+        //   },
+        // });
 
-        const totalComments = await tx.comment.count();
+        // const totalComments = await tx.comment.count();
 
-        const totalApprovedComments = await tx.comment.count({
-          where: {
-            status: CommentStatus.APPROVED
-          }
-        });
+        // const totalApprovedComments = await tx.comment.count({
+        //   where: {
+        //     status: CommentStatus.APPROVED
+        //   }
+        // });
 
-        const totalRejectedComments = await tx.comment.count({
-          where: {
-            status: CommentStatus.REJECT,
-          },
-        });
+        // const totalRejectedComments = await tx.comment.count({
+        //   where: {
+        //     status: CommentStatus.REJECT,
+        //   },
+        // });
 
 
-        // ______ Total post views
+        // // ______ Total post views
 
-        // - Not good approach -> O(n)
-        // const allPost = await tx.post.findMany();
-        // let totalPostView = 0;
+        // // - Not good approach -> O(n)
+        // // const allPost = await tx.post.findMany();
+        // // let totalPostView = 0;
 
-        // allPost.forEach( (post) => {
-        //   totalPostView += post.views;
+        // // allPost.forEach( (post) => {
+        // //   totalPostView += post.views;
+        // // })
+
+        // // - Use Aggregate function
+        // const totalPostViewsAggregate = await tx.post.aggregate({
+        //   _sum: {
+        //     views: true
+        //   }
         // })
+        // const totalPostViews = totalPostViewsAggregate._sum.views;
 
-        // - Use Aggregate function
-        const totalPostViewsAggregate = await tx.post.aggregate({
-          _sum: {
-            views: true
-          }
-        })
-        const totalPostViews = totalPostViewsAggregate._sum.views;
+        // return {
+        //   totalPosts,
+        //   totalPublishedPosts,
+        //   totalDraftPosts,
+        //   totalArchivedPosts,
+        //   totalComments,
+        //   totalApprovedComments,
+        //   totalRejectedComments,
+        //   totalPostViews,
+        // };
+
+
+        const [
+          totalPosts,
+          totalPublishedPosts,
+          totalDraftPosts,
+          totalArchivedPosts,
+          totalComments,
+          totalApprovedComments,
+          totalRejectedComments,
+          totalPostViews,
+        ] = await Promise.all([
+          await tx.post.count(),
+
+          await tx.post.count({
+            where: {
+              status: ContentStatus.PUBLISHED,
+            },
+          }),
+
+          await tx.post.count({
+            where: {
+              status: ContentStatus.DRAFT,
+            },
+          }),
+
+          await tx.post.count({
+            where: {
+              status: ContentStatus.ARCHIVED,
+            },
+          }),
+
+          await tx.comment.count(),
+          await tx.comment.count({
+            where: {
+              status: CommentStatus.APPROVED,
+            },
+          }),
+
+          await tx.comment.count({
+            where: {
+              status: CommentStatus.REJECT,
+            },
+          }),
+
+          await tx.post.aggregate({
+            _sum: {
+              views: true,
+            },
+          }),
+        ]);
 
         return {
           totalPosts,
@@ -234,7 +398,7 @@ const getPostStats = async () => {
           totalComments,
           totalApprovedComments,
           totalRejectedComments,
-          totalPostViews,
+          totalPostViews: totalPostViews._sum.views
         };
 
       }
@@ -243,12 +407,14 @@ const getPostStats = async () => {
     return transactionResult;
 }
 
+
 export const postService = {
-    createPost,
-    getAllPosts,
-    getMyPosts,
-    getPostsById,
-    updatePost,
-    deletePost,
-    getPostStats
-}
+  createPost,
+  getAllPosts,
+  getMyPosts,
+  getPostsById,
+  updatePost,
+  deletePost,
+  getPostStats,
+  postSearchService,
+};

@@ -12,9 +12,17 @@ const createPost = catchAsync(async (req: Request, res: Response, next: NextFunc
 });
 
 const getAllPosts = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const result = await postService.getAllPosts();
+    const queryOptions = req.query;
+    const result = await postService.getAllPosts(queryOptions);
     sendSuccess(res, statusCode.OK, "All post retrieve successfully!", result);
 });
+
+const searchPosts = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    //const payload = req.body;
+    const result = await postService.postSearchService();
+    sendSuccess(res, statusCode.OK, "Searching something!", result);
+  },
+);
 
 const getMyPosts = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const id = req.user?.id as string;
@@ -46,6 +54,8 @@ const getPostStats = catchAsync(async (req: Request, res: Response, next: NextFu
   sendSuccess(res, statusCode.OK, "Statistical posts data retrieved successfully!", result);
 });
 
+
+
 export const postController = {
   createPost,
   getAllPosts,
@@ -53,5 +63,6 @@ export const postController = {
   getPostsById,
   updatePost,
   deletePost,
-  getPostStats
+  getPostStats,
+  searchPosts,
 };
