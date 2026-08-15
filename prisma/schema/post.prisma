@@ -7,9 +7,12 @@ model Post {
   status     ContentStatus @default(PUBLISHED)
   tags       String[]      @db.Text
   views      Int           @default(0)
-  authorId   String        @db.Uuid
+  authorId   String
   author     User          @relation(fields: [authorId], references: [id])
   comments   Comment[]
+  reactions  Reaction[]
+  bookmarks  Bookmark[]
+
 
   createdAt  DateTime      @default(now()) @db.Timestamp
   updatedAt  DateTime      @updatedAt @db.Timestamp

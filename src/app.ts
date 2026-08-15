@@ -9,6 +9,8 @@ import { globalErrorHandler } from "./middleware/globalErrorHandler";
 import { authRoutes } from "./modules/auth/auth.route";
 import { postRoutes } from "./modules/post/post.routes";
 import { commentsRoutes } from "./modules/comment/comment.routes";
+import { reactionRoutes } from "./modules/reaction/reaction.routes";
+import { bookmarkRoutes } from "./modules/bookmark/bookmark.routes";
 
 const app: Application = express();
 
@@ -44,6 +46,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentsRoutes);
+app.use("/api/reactions", reactionRoutes);
+app.use("/api/bookmarks", bookmarkRoutes);
 
 
 // Use global error handler (Must be placed after all routes)

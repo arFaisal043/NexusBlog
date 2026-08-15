@@ -65,6 +65,11 @@ const getAllPosts = async (queryOptions: IPostQueryOptions) => {
             status: CommentStatus.APPROVED, 
           },
         },
+        _count: {
+          select: {
+            reactions: true
+          }
+        }
       },
       orderBy,
       // pagination
@@ -210,6 +215,7 @@ const getPostsById = async (postId: string) => {
       _count: {
         select: {
           comments: true,
+          reactions: true,
         },
       },
     },

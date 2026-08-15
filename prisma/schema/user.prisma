@@ -13,6 +13,8 @@ model User {
     
     // 1-to-Many Relation with Post
     posts        Post[]
+    reactions    Reaction[]
+    bookmarks    Bookmark[]
 
     @@map("users")
 }

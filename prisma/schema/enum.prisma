@@ -19,3 +19,8 @@ enum CommentStatus {
   APPROVED
   REJECT
 }
+
+enum ReactionType {
+  LIKE
+  DISLIKE
+}
