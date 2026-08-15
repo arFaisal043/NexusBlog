@@ -1,6 +1,7 @@
-import { CommentStatus, ContentStatus } from "../../../generated/prisma/enums";
+import { CommentStatus, ContentStatus, ReactionType } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { ICreatePostPayload, IPostQueryOptions, IUpdatePostPayload } from "./post.interface";
+import { calculatePagination, getPaginationMeta } from "../../utils/pagination";
 
 const createPost = async (payload: ICreatePostPayload, userId: string) => {
     const result = await prisma.post.create({
@@ -15,12 +16,10 @@ const createPost = async (payload: ICreatePostPayload, userId: string) => {
 
 //__________ Searching in getAllPosts API -> api/posts?title=AI&tag=AI&sort=popular&page=1&limit=4
 const getAllPosts = async (queryOptions: IPostQueryOptions) => {
-    const { search, tag, sort, page, limit } = queryOptions;
+    const { search, tag, sort } = queryOptions;
 
-    // Pagination variable
-    const pageNumber = parseInt(page as string) || 1;
-    const limitNumber = parseInt(limit as string) || 5;
-    const skip = (pageNumber - 1) * limitNumber;
+    // Use Reusable Pagination Utility
+    const { page, limit, skip } = calculatePagination(queryOptions);
 
     const where: any = {};
 
@@ -73,19 +72,14 @@ const getAllPosts = async (queryOptions: IPostQueryOptions) => {
       },
       orderBy,
       // pagination
-      take: limitNumber,
+      take: limit,
       skip,
     });
 
     const total = await prisma.post.count({ where });
 
     return {
-      meta: {
-        total,
-        page: pageNumber,
-        limit: limitNumber,
-        totalPages: Math.ceil(total / limitNumber),
-      },
+      meta: getPaginationMeta(total, page, limit),
       data: allPost,
     };
 }
@@ -355,6 +349,8 @@ const getPostStats = async () => {
           totalApprovedComments,
           totalRejectedComments,
           totalPostViews,
+          totalLikes,
+          totalDislikes,
         ] = await Promise.all([
           await tx.post.count(),
 
@@ -394,6 +390,18 @@ const getPostStats = async () => {
               views: true,
             },
           }),
+
+          await tx.reaction.count({
+            where: {
+              type: ReactionType.LIKE,
+            },
+          }),
+
+          await tx.reaction.count({
+            where: {
+              type: ReactionType.DISLIKE,
+            },
+          }),
         ]);
 
         return {
@@ -404,7 +412,9 @@ const getPostStats = async () => {
           totalComments,
           totalApprovedComments,
           totalRejectedComments,
-          totalPostViews: totalPostViews._sum.views
+          totalPostViews: totalPostViews._sum.views,
+          totalLikes,
+          totalDislikes,
         };
 
       }

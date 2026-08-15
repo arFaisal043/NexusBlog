@@ -1,8 +1,16 @@
 import { prisma } from "../../lib/prisma";
+import { IBookmarkQueryOptions } from "./bookmark.interface";
+import { calculatePagination, getPaginationMeta } from "../../utils/pagination";
 
 const toggleBookmark = async (postId: string, userId: string) => {
   // Check if post exists
-  await prisma.post.findUniqueOrThrow({ where: { id: postId } });
+  await prisma.post.findUniqueOrThrow(
+    { 
+      where: { 
+        id: postId 
+      } 
+    }
+  );
 
   const existingBookmark = await prisma.bookmark.findUnique({
     where: {
@@ -18,8 +26,10 @@ const toggleBookmark = async (postId: string, userId: string) => {
     await prisma.bookmark.delete({
       where: { id: existingBookmark.id },
     });
+
     return { message: "Bookmark removed", action: "removed" };
-  } else {
+  } 
+  else {
     // Create new bookmark
     const newBookmark = await prisma.bookmark.create({
       data: {
@@ -27,14 +37,14 @@ const toggleBookmark = async (postId: string, userId: string) => {
         userId,
       },
     });
+
     return { message: "Bookmark added", action: "added", data: newBookmark };
   }
 };
 
-const getMyBookmarks = async (userId: string, page: any, limit: any) => {
-  const pageNumber = parseInt(page as string, 10) || 1;
-  const limitNumber = parseInt(limit as string, 10) || 10;
-  const skip = (pageNumber - 1) * limitNumber;
+const getMyBookmarks = async (userId: string, queryOptions: IBookmarkQueryOptions) => {
+  // Use Reusable Pagination Utility
+  const { page, limit, skip } = calculatePagination(queryOptions);
 
   const where = { userId };
 
@@ -53,19 +63,14 @@ const getMyBookmarks = async (userId: string, page: any, limit: any) => {
       },
     },
     orderBy: { createdAt: "desc" },
-    take: limitNumber,
+    take: limit,
     skip,
   });
 
   const total = await prisma.bookmark.count({ where });
 
   return {
-    meta: {
-      total,
-      page: pageNumber,
-      limit: limitNumber,
-      totalPages: Math.ceil(total / limitNumber),
-    },
+    meta: getPaginationMeta(total, page, limit),
     data: bookmarks,
   };
 };
