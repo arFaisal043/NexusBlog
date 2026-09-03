@@ -24,3 +24,9 @@ enum ReactionType {
   LIKE
   DISLIKE
 }
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+}

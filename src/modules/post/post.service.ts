@@ -14,11 +14,14 @@ const createPost = async (payload: ICreatePostPayload, userId: string) => {
     return result;
 };
 
-//__________ Searching in getAllPosts API -> api/posts?title=AI&tag=AI&sort=popular&page=1&limit=4
+//__________ Searching in getAllPosts API ________________________________
+// -> api/posts
+// -> api/posts?title=AI&tag=AI&sort=popular&page=1&limit=4
+
 const getAllPosts = async (queryOptions: IPostQueryOptions) => {
     const { search, tag, sort } = queryOptions;
 
-    // Use Reusable Pagination Utility
+    // From Pagination utils
     const { page, limit, skip } = calculatePagination(queryOptions);
 
     const where: any = {};

@@ -1,6 +1,8 @@
 import express, { Application, Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { config } from "./config";
 import { prisma } from "./lib/prisma";
 import bcrypt from "bcryptjs";
@@ -13,6 +15,22 @@ import { reactionRoutes } from "./modules/reaction/reaction.routes";
 import { bookmarkRoutes } from "./modules/bookmark/bookmark.routes";
 
 const app: Application = express();
+
+// Security Middleware
+app.use(helmet());
+
+// Rate Limiting (limit repeated requests to APIs)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: {
+    status: "ERROR",
+    message: "Too many requests from this IP, please try again after 15 minutes",
+  },
+  standardHeaders: true, 
+  legacyHeaders: false, 
+});
+app.use("/api", apiLimiter);
 
 // Built in Middleware
 app.use(express.json());
@@ -34,7 +52,7 @@ app.use(
 app.get("/", (req: Request, res: Response) => {
   res.json({
     status: "OK",
-    message: "This is Root Routes",
+    message: "Welcome to NexusBlog!",
   });
 });
 

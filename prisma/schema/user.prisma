@@ -8,10 +8,13 @@ model User {
     createdAt    DateTime     @default(now()) @db.Timestamp
     updatedAt    DateTime     @updatedAt @db.Timestamp
 
-    // 1-to-1 Relation with Profile
+    // 1 to 1 Relation with Profile
     profile      Profile?
+
+    // 1 to 1 Relation with subscription
+    subscription Subscription? 
     
-    // 1-to-Many Relation with Post
+    // 1 to Many Relation with Post
     posts        Post[]
     reactions    Reaction[]
     bookmarks    Bookmark[]

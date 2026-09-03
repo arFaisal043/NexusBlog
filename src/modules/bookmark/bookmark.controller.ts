@@ -13,9 +13,7 @@ const toggleBookmark = catchAsync(async (req: Request, res: Response, next: Next
 
 const getMyBookmarks = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const userId = req.user?.id as string;
-
   const result = await bookmarkService.getMyBookmarks(userId, req.query);
-
   sendSuccess(res, statusCode.OK, "Bookmarks fetched successfully", result);
 });
 
