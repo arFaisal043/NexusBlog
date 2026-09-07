@@ -13,6 +13,7 @@ import { postRoutes } from "./modules/post/post.routes";
 import { commentsRoutes } from "./modules/comment/comment.routes";
 import { reactionRoutes } from "./modules/reaction/reaction.routes";
 import { bookmarkRoutes } from "./modules/bookmark/bookmark.routes";
+import { subscriptionRoutes } from "./modules/subscription/subscription.routes";
 
 const app: Application = express();
 
@@ -57,7 +58,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 
-// ___________ All Routes
+// ___________ All Routes _______________________
 
 // prefix for auth api
 app.use("/api/auth", authRoutes);
@@ -66,6 +67,7 @@ app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentsRoutes);
 app.use("/api/reactions", reactionRoutes);
 app.use("/api/bookmarks", bookmarkRoutes);
+app.use("/api/subscription", subscriptionRoutes);
 
 
 // Use global error handler (Must be placed after all routes)
