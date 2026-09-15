@@ -11,4 +11,7 @@ router.post(
     subscriptionController.createCheckoutSession
 );
 
+
+router.post("/webhook", subscriptionController.handleWebhook);
+
 export const subscriptionRoutes = router;

@@ -8,7 +8,7 @@ const toggleReaction = catchAsync(async (req: Request, res: Response, next: Next
   const { postId } = req.params;
   const { type } = req.body;
   const userId = req.user?.id as string;
-  const result = await reactionService.toggleReaction(postId, userId, type);
+  const result = await reactionService.toggleReaction(postId as string, userId, type);
   sendSuccess(res, statusCode.OK, result.message, result.data);
 });
 
