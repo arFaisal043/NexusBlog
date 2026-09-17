@@ -11,6 +11,11 @@ export const getPeriodEnd = (payload: Stripe.Subscription) => {
   // convert into a Date object
   const currentPeriodEndDate = new Date(currentPeriodEndInSeconds * 1000);
 
+  console.log("=== STRIPE DATE DEBUG ===");
+  console.log("Raw Stripe Timestamp:", currentPeriodEndInSeconds);
+  console.log("Converted JS Date:", currentPeriodEndDate);
+  console.log("=========================");
+
   return currentPeriodEndDate;
 };
 
