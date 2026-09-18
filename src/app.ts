@@ -15,6 +15,7 @@ import { reactionRoutes } from "./modules/reaction/reaction.routes";
 import { bookmarkRoutes } from "./modules/bookmark/bookmark.routes";
 import { subscriptionRoutes } from "./modules/subscription/subscription.routes";
 import { stripe } from "./lib/stripe";
+import { premiumContentRoutes } from "./modules/premium/premium.routes";
 
 const app: Application = express();
 
@@ -133,6 +134,7 @@ app.use("/api/comments", commentsRoutes);
 app.use("/api/reactions", reactionRoutes);
 app.use("/api/bookmarks", bookmarkRoutes);
 app.use("/api/subscription", subscriptionRoutes);
+app.use("/api/premium", premiumContentRoutes);
 
 
 // Use global error handler (Must be placed after all routes)

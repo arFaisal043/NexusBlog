@@ -13,6 +13,7 @@ model Post {
   reactions  Reaction[]
   bookmarks  Bookmark[]
 
+  // if isPremium = true -> access subscribed user
   isPremium Boolean @default(false)
 
   createdAt  DateTime      @default(now()) @db.Timestamp
