@@ -53,7 +53,19 @@ const getCommentByCommentId = async (commentId: string) => {
     return comment;
 };
 
-const updateComment = async (payload: IUpdateCommentPayload, commentId: string) => {
+const updateComment = async (payload: IUpdateCommentPayload, commentId: string, userId: string, userRole: string) => {
+    const existingComment = await prisma.comment.findUnique({
+      where: { id: commentId }
+    });
+
+    if (!existingComment) {
+      throw new CustomError("Comment not found", statusCode.NOT_FOUND);
+    }
+
+    if (existingComment.authorId !== userId && userRole !== Role.ADMIN) {
+      throw new CustomError("You do not have permission to update this comment", statusCode.FORBIDDEN);
+    }
+
     const update = await prisma.comment.update({
       where: {
         id: commentId,
@@ -64,7 +76,7 @@ const updateComment = async (payload: IUpdateCommentPayload, commentId: string) 
     return update;
 };
 
-const deleteComment = async (commentId: string) => {
+const deleteComment = async (commentId: string, userId: string, userRole: string) => {
     // check if comment exist or not?
     const isCommentExist = await prisma.comment.findUnique({
         where: {
@@ -74,6 +86,10 @@ const deleteComment = async (commentId: string) => {
 
     if(!isCommentExist) {
         throw new CustomError("Comment is not exist", statusCode.NOT_FOUND)
+    }
+
+    if (isCommentExist.authorId !== userId && userRole !== Role.ADMIN) {
+        throw new CustomError("You do not have permission to delete this comment", statusCode.FORBIDDEN);
     }
 
     // if exist then delete
