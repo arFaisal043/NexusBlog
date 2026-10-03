@@ -32,20 +32,23 @@ const getMyPosts = catchAsync(async (req: Request, res: Response, next: NextFunc
 
 const getPostsById = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const postId = req.params.postId as string;
-  const result = await postService.getPostsById(postId);
+  const userId = req.user?.id as string | undefined;
+  const result = await postService.getPostsById(postId, userId);
   sendSuccess( res, statusCode.OK, "Post retrieve successfully!", result);
 });
 
 const updatePost = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const id = req.params.postId as string;
+  const userId = req.user?.id as string;
   const payload = req.body;
-  const result = await postService.updatePost(id, payload);
+  const result = await postService.updatePost(id, payload, userId);
   sendSuccess(res, statusCode.OK, "Post updated successfully!", result);
 });
 
 const deletePost = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const id = req.params.postId as string;
-  const result = await postService.deletePost(id);
+  const userId = req.user?.id as string;
+  const result = await postService.deletePost(id, userId);
   sendSuccess(res, statusCode.OK, "Post deleted successfully!", result);
 });
 

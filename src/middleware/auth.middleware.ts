@@ -70,3 +70,40 @@ export const authMiddleware = (...userRoleList: Role[]) => {
     next();
   });
 }
+
+export const optionalAuthMiddleware = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const token = req.cookies.accessToken ? 
+        req.cookies.accessToken
+        : req.headers.authorization?.startsWith("Bearer") ? 
+        req.headers.authorization?.split(" ")[1]
+        : req.headers.authorization;
+
+    if (!token) {
+      return next();
+    }
+
+    const decoded = verifyToken(token, config.secret as string);
+    if (!decoded.success) {
+      return next();
+    }
+
+    const { name, email, id, role } = decoded.data as JwtPayload;
+
+    const user = await prisma.user.findUnique({
+      where: { id, email, name, role },
+    });
+
+    if (user && user.activeStatus === "ACTIVE") {
+      req.user = {
+          email,
+          name,
+          id,
+          role
+      };
+    }
+  } catch (error) {
+    // Ignore errors for optional auth, user will remain guest
+  }
+  next();
+});

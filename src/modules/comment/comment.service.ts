@@ -5,6 +5,20 @@ import { ICreateCommentPayload, IUpdateCommentPayload } from "./comment.interfac
 import statusCode from "http-status";
 
 const createComment = async (payload: ICreateCommentPayload, authorId: string) => {
+    // Check if post exists and if it's premium
+    const post = await prisma.post.findUniqueOrThrow({
+        where: { id: payload.postId }
+    });
+
+    if (post.isPremium) {
+        const subscription = await prisma.subscription.findUnique({
+            where: { userId: authorId },
+        });
+        if (subscription?.status !== "ACTIVE") {
+            throw new Error("Only active premium users can comment on premium posts.");
+        }
+    }
+
     const result = await prisma.comment.create({
         data: {
             postId: payload.postId,

@@ -5,6 +5,7 @@ export interface ICreatePostPayload {
   content: string;
   thumbnail?: string;
   isFeatured?: boolean;
+  isPremium?: boolean;
   status?: ContentStatus;
   tags: string[];
 }
@@ -14,6 +15,7 @@ export interface IUpdatePostPayload {
   content?: string;
   thumbnail?: string;
   isFeatured?: boolean;
+  isPremium?: boolean;
   status?: ContentStatus;
   tags?: string[];
 }

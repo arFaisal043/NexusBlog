@@ -4,6 +4,16 @@ import { ICreatePostPayload, IPostQueryOptions, IUpdatePostPayload } from "./pos
 import { calculatePagination, getPaginationMeta } from "../../utils/pagination";
 
 const createPost = async (payload: ICreatePostPayload, userId: string) => {
+    if (payload.isPremium) {
+      const subscription = await prisma.subscription.findUnique({
+        where: { userId },
+      });
+
+      if (subscription?.status !== "ACTIVE") {
+        throw new Error("Only premium users can create premium content.");
+      }
+    }
+
     const result = await prisma.post.create({
       data: {
         ...payload,
@@ -24,7 +34,9 @@ const getAllPosts = async (queryOptions: IPostQueryOptions) => {
     // From Pagination utils
     const { page, limit, skip } = calculatePagination(queryOptions);
 
-    const where: any = {};
+    const where: any = {
+      isPremium: false,
+    };
 
     if(search) {
       where.OR = [
@@ -174,7 +186,27 @@ const getMyPosts = async (userId: string) => {
   return post;
 }
 
-const getPostsById = async (postId: string) => {
+const getPostsById = async (postId: string, userId?: string) => {
+  // First, check if the post exists and if it's premium
+  const postCheck = await prisma.post.findUniqueOrThrow({
+    where: { 
+      id: postId 
+    },
+  });
+
+  // If the post is premium, ensure the user is logged in and has an active subscription
+  if (postCheck.isPremium) {
+    if (!userId) {
+      throw new Error("You must be logged in to view premium content.");
+    }
+    const subscription = await prisma.subscription.findUnique({
+      where: { userId },
+    });
+    if (subscription?.status !== "ACTIVE") {
+      throw new Error("Please subscribe to access premium contents.");
+    }
+  }
+
   // ________ for count views
   await prisma.post.update({
     where: {
@@ -186,8 +218,6 @@ const getPostsById = async (postId: string) => {
       }
     }
   })
-
-  // throw new Error("Fake Error");
 
   // _______ updated data after counting views
   const post = await prisma.post.findUnique({
@@ -221,13 +251,23 @@ const getPostsById = async (postId: string) => {
   return post;
 };
 
-const updatePost = async (postId: string, payload: IUpdatePostPayload) => {
+const updatePost = async (postId: string, payload: IUpdatePostPayload, userId: string) => {
   // is post exist?
   const post = await prisma.post.findUniqueOrThrow({
     where: {
       id: postId
     }
   })
+
+  if (payload.isPremium) {
+    const subscription = await prisma.subscription.findUnique({
+      where: { userId },
+    });
+
+    if (subscription?.status !== "ACTIVE") {
+      throw new Error("Only premium users can update to premium content.");
+    }
+  }
 
   // update based on users payload
   const result = await prisma.post.update({
@@ -258,20 +298,38 @@ const updatePost = async (postId: string, payload: IUpdatePostPayload) => {
   return result;
 };
 
-const deletePost = async (postId: string) => {
+const deletePost = async (postId: string, userId: string) => {
   // is post exist?
   const post = await prisma.post.findUniqueOrThrow({
     where: {
       id: postId
     }
-  })
+  });
+
+  // Verify ownership
+  if (post.authorId !== userId) {
+    throw new Error("You do not have permission to delete this post.");
+  }
+
+  // If it's a premium post, verify they have an active subscription
+  if (post.isPremium) {
+    const subscription = await prisma.subscription.findUnique({
+      where: { userId }
+    });
+
+    if (subscription?.status !== "ACTIVE") {
+      throw new Error("Only active premium users can delete their premium posts.");
+    }
+  }
 
   // delete the post
   const result = await prisma.post.delete({
     where: {
       id: postId
     }
-  })
+  });
+
+  return result;
 }
 
 const getPostStats = async () => {

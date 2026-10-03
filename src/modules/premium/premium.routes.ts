@@ -1,13 +1,15 @@
-import { Router } from "express";
+import { NextFunction, Request, Response, Router } from "express";
 import { premiumContentController } from "./premium.controller";
 import { authMiddleware } from "../../middleware/auth.middleware";
-import { Role } from "../../../generated/prisma/enums";
+import { Role, SubscriptionStatus } from "../../../generated/prisma/enums";
+import { subscriptionGuard } from "../../middleware/premiumGaurd";
 
 const router = Router();
 
 router.get(
   "/",
   authMiddleware(Role.ADMIN, Role.AUTHOR, Role.USER),
+  subscriptionGuard(),
   premiumContentController.GetPremiumContent,
 );
 
