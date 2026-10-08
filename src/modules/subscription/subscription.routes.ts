@@ -2,6 +2,7 @@ import { Router } from "express";
 import { subscriptionController } from "./subscription.controller";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { Role } from "../../../generated/prisma/enums";
+import { subscriptionGuard } from "../../middleware/premiumGaurd";
 
 const router = Router();
 
@@ -11,8 +12,17 @@ router.post(
   subscriptionController.createCheckoutSession,
 );
 
+// Cancel Subscription Router
+router.post(
+  "/cancel",
+  authMiddleware(Role.USER, Role.ADMIN, Role.AUTHOR),
+  subscriptionController.cancelSubscription,
+);
+
+// webhook endpoint
 router.post("/webhook", subscriptionController.handleWebhook);
 
+// get subscription status
 router.get(
   "/subscription-status",
   authMiddleware(Role.USER, Role.ADMIN, Role.AUTHOR),

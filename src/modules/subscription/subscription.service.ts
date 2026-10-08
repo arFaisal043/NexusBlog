@@ -109,8 +109,34 @@ const getSubscriptionStatus = async (userId: string) => {
   }
 };
 
+const cancelSubscription = async (userId: string) => {
+  const subscription = await prisma.subscription.findUnique({
+    where: {
+      userId,
+    },
+  });
+
+  if (!subscription) {
+    throw new Error("No active subscription found to cancel.");
+  }
+
+  console.log(subscription.stripeSubscriptionId)
+
+  if (!subscription.stripeSubscriptionId) {
+    throw new Error("No Stripe subscription found for this user.");
+  }
+
+  // We can cancel the subscription immediately via Stripe
+  const canceledSubscription = await stripe.subscriptions.cancel(
+    subscription.stripeSubscriptionId
+  );
+
+  return canceledSubscription;
+};
+
 export const subscriptionServices = {
   createCheckoutSession,
   handleWebhook,
   getSubscriptionStatus,
+  cancelSubscription,
 };
