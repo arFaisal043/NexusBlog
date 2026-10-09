@@ -33,7 +33,8 @@ const apiLimiter = rateLimit({
   standardHeaders: true, 
   legacyHeaders: false, 
 });
-app.use("/api", apiLimiter);
+// Temporarily commented out for load testing:
+// app.use("/api", apiLimiter);
 
 
 

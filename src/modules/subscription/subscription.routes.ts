@@ -2,7 +2,6 @@ import { Router } from "express";
 import { subscriptionController } from "./subscription.controller";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { Role } from "../../../generated/prisma/enums";
-import { subscriptionGuard } from "../../middleware/premiumGaurd";
 
 const router = Router();
 

@@ -2,7 +2,7 @@ import { NextFunction, Request, Response, Router } from "express";
 import { premiumContentController } from "./premium.controller";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { Role, SubscriptionStatus } from "../../../generated/prisma/enums";
-import { subscriptionGuard } from "../../middleware/premiumGaurd";
+import { subscriptionGuard } from "../../middleware/premiumGuard";
 
 const router = Router();
 
