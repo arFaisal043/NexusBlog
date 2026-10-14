@@ -1,6 +1,6 @@
 import { CommentStatus, ContentStatus, ReactionType } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
-import { ICreatePostPayload, IPostQueryOptions, IUpdatePostPayload } from "./post.interface";
+import { ICreatePostPayload, IPopularPostQueryOptions, IPostQueryOptions, IUpdatePostPayload } from "./post.interface";
 import { calculatePagination, getPaginationMeta } from "../../utils/pagination";
 
 const createPost = async (payload: ICreatePostPayload, userId: string) => {
@@ -484,6 +484,119 @@ const getPostStats = async () => {
     return transactionResult;
 }
 
+// __________ GET POPULAR POSTS ────────────────────────────────────
+
+const getPopularPosts = async (queryOptions: IPopularPostQueryOptions) => {
+  // Step 1: Parse query params
+  const limit = Math.min(Number(queryOptions.limit) || 10, 20);
+  const timeframe = queryOptions.timeframe || "all";
+
+  // Step 2: Build the optional date filter 
+  let createdAtFilter: Date | undefined = undefined;
+
+  if (timeframe !== "all") {
+    const now = new Date();
+    if (timeframe === "day") {
+      // Last 24 hours
+      createdAtFilter = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    } 
+    else if (timeframe === "week") {
+      // Last 7 days
+      createdAtFilter = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } 
+    else if (timeframe === "month") {
+      // Last 30 days
+      createdAtFilter = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    }
+  }
+
+  // Step 3: Fetch posts from DB
+  const posts = await prisma.post.findMany({
+    where: {
+      status: ContentStatus.PUBLISHED,
+      isPremium: false,
+      ...(createdAtFilter && { createdAt: { gte: createdAtFilter } }),
+    },
+    select: {
+      id: true,
+      title: true,
+      thumbnail: true,
+      tags: true,
+      views: true,
+      createdAt: true,
+      // Fetch author info but omit password for security
+      author: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      // Count only APPROVED comments (same filter as other APIs)
+      _count: {
+        select: {
+          // counts all reactions (LIKE + DISLIKE) at SQL level
+          reactions: true,
+          // counts all approved comments at SQL level
+          comments: {
+            where: {
+              status: CommentStatus.APPROVED,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Step 4: Count only LIKE reactions per post 
+  // This is ONE single DB query — not N queries.
+  const likeCountsRaw = await prisma.reaction.groupBy({
+    by: ["postId"],
+    where: {
+      type: ReactionType.LIKE,
+      postId: { in: posts.map((p) => p.id) },
+    },
+    _count: {
+      _all: true,
+    },
+  });
+
+  // Convert the groupBy array into a Map for O(1) lookup by postId
+  // Map shape: { postId -> likeCount }
+  const likeCountMap = new Map<string, number>(
+    likeCountsRaw.map((item) => [item.postId, item._count._all])
+  );
+
+  // Step 5: Compute popularity score for every post
+  // Formula: Score = (views × 1.0) + (likes × 3.0) + (comments × 2.0)
+  const scoredPosts = posts.map((post) => {
+    const views    = post.views;                                
+    const likes    = likeCountMap.get(post.id) ?? 0;         
+    const comments = post._count.comments;                   
+
+    const popularityScore =
+      views * 1.0 +
+      likes * 3.0 +
+      comments * 2.0;
+
+    return {
+      ...post,
+      likes,        
+      popularityScore,
+    };
+  });
+
+  // Step 6: Sort by score (descending) & slice to requested limit
+  const popularPosts = scoredPosts
+    .sort((a, b) => b.popularityScore - a.popularityScore)
+    .slice(0, limit);
+
+  return {
+    timeframe,
+    limit,
+    data: popularPosts,
+  };
+};
 
 export const postService = {
   createPost,
@@ -494,4 +607,5 @@ export const postService = {
   deletePost,
   getPostStats,
   postSearchService,
+  getPopularPosts,
 };

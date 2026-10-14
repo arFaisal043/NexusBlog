@@ -3,6 +3,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { postService } from "./post.service";
 import { sendSuccess } from "../../utils/response";
 import statusCode from "http-status";
+import { IPopularPostQueryOptions } from "./post.interface";
 
 const createPost = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const id = req.user?.id as string;
@@ -57,6 +58,11 @@ const getPostStats = catchAsync(async (req: Request, res: Response, next: NextFu
   sendSuccess(res, statusCode.OK, "Statistical posts data retrieved successfully!", result);
 });
 
+const getPopularPosts = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const queryOptions = req.query as IPopularPostQueryOptions;
+  const result = await postService.getPopularPosts(queryOptions);
+  sendSuccess(res, statusCode.OK, "Popular posts retrieved successfully!", result);
+});
 
 
 export const postController = {
@@ -68,4 +74,5 @@ export const postController = {
   deletePost,
   getPostStats,
   searchPosts,
+  getPopularPosts,
 };
