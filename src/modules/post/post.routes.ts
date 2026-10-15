@@ -2,10 +2,12 @@ import { Router } from "express";
 import { postController } from "./post.controller";
 import { authMiddleware, optionalAuthMiddleware } from "../../middleware/auth.middleware";
 import { Role } from "../../../generated/prisma/enums";
+import { validateRequest } from "../../middleware/validateRequest";
+import { createPostSchema, updatePostSchema } from "./post.validation";
 
 const router = Router();
 
-router.post("/", authMiddleware(Role.ADMIN, Role.USER, Role.AUTHOR), postController.createPost);
+router.post("/", authMiddleware(Role.ADMIN, Role.USER, Role.AUTHOR), validateRequest(createPostSchema), postController.createPost);
 
 router.get("/", postController.getAllPosts);
 
@@ -15,12 +17,11 @@ router.get("/my-post", authMiddleware(Role.ADMIN, Role.USER, Role.AUTHOR), postC
 
 router.get("/stats", authMiddleware(Role.ADMIN), postController.getPostStats);
 
-// [ /api/posts/popular?limit=5&timeframe=day/week/month/all ]
 router.get("/popular", postController.getPopularPosts);
 
 router.get("/:postId", optionalAuthMiddleware, postController.getPostsById);
 
-router.patch("/:postId", authMiddleware(Role.ADMIN, Role.USER, Role.AUTHOR), postController.updatePost);
+router.patch("/:postId", authMiddleware(Role.ADMIN, Role.USER, Role.AUTHOR), validateRequest(updatePostSchema), postController.updatePost);
 
 router.delete("/:postId", authMiddleware(Role.ADMIN, Role.USER, Role.AUTHOR), postController.deletePost);
 

@@ -10,15 +10,18 @@ import { JwtPayload } from "jsonwebtoken";
 import { decode } from "node:punycode";
 import { prisma } from "../../lib/prisma";
 import { authMiddleware } from "../../middleware/auth.middleware";
+import { validateRequest } from "../../middleware/validateRequest";
+import { registerSchema, updateProfileSchema } from "./user.validation";
 
 const router = Router();
 
-router.post("/register", userController.registerUser);
+router.post("/register", validateRequest(registerSchema), userController.registerUser);
 
 router.get("/me", authMiddleware(Role.ADMIN, Role.USER, Role.AUTHOR), userController.getMyProfile);
 
 router.put("/my-profile", 
-    authMiddleware(Role.ADMIN, Role.USER, Role.AUTHOR), 
+    authMiddleware(Role.ADMIN, Role.USER, Role.AUTHOR),
+    validateRequest(updateProfileSchema),
     userController.updateMyProfile
 );
 
