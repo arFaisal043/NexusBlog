@@ -26,6 +26,9 @@ The API is engineered for security and scalability — featuring JWT-based authe
 
 ---
 
+## ✅ NexusBlog System Design
+![System Design](C:\Users\USER\Desktop\NexusBlog\NexusBlog_System_Design.png)
+
 ## 🏅 Badges
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/arFaisal043/prisma-blog-app?style=flat-square)

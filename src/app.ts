@@ -2,6 +2,7 @@ import express, { Application, request, Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet from "helmet";
+import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import { config } from "./config";
 import { prisma } from "./lib/prisma";
@@ -21,6 +22,9 @@ const app: Application = express();
 
 // Security Middleware
 app.use(helmet());
+
+// Logger
+app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
 // Rate Limiting (limit repeated requests to APIs)
 const apiLimiter = rateLimit({

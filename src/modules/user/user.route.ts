@@ -1,14 +1,6 @@
-import { NextFunction, Request, Response, Router } from "express";
+import { Router } from "express";
 import { userController } from "./user.controller";
-import { CustomError } from "../../utils/customError";
-import statusCode from "http-status";
-import { verifyToken } from "../../utils/jwt";
-import { config } from "../../config";
 import { Role } from "../../../generated/prisma/enums";
-import { catchAsync } from "../../utils/catchAsync";
-import { JwtPayload } from "jsonwebtoken";
-import { decode } from "node:punycode";
-import { prisma } from "../../lib/prisma";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { validateRequest } from "../../middleware/validateRequest";
 import { registerSchema, updateProfileSchema } from "./user.validation";

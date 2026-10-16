@@ -99,58 +99,60 @@ const getAllPosts = async (queryOptions: IPostQueryOptions) => {
     };
 }
 
-const postSearchService = async () => {
-  const posts = await prisma.post.findMany({
-    // ________ Searching __________________________
+// ________ for practice __________________________
 
-    // where: {
-    //   title: "My Fourth Blog Post",
-    //   //content: "This is the full content of my blog post..."
-    // },
+// const postSearchService = async () => {
+//   const posts = await prisma.post.findMany({
+//     // ________ Searching __________________________
 
-    // // ________ Exact Searching __________________________
-    // where: {
-    //   AND: [
-    //     {
-    //       title: "My Fourth Blog Post", // Case sensitive
-    //     },
-    //     {
-    //       content: "This is the full content of my blog post...",
-    //     },
-    //   ],
-    // },
+//     // where: {
+//     //   title: "My Fourth Blog Post",
+//     //   //content: "This is the full content of my blog post..."
+//     // },
 
-    // // ________ Partial Searching __________________________
-    where: {
-      OR: [
-        {
-          title: {
-            contains: "My Fou",
-            mode: "insensitive", // Not Case sensitive
-          },
-        },
-        {
-          content: {
-            contains: "This is the full content of my blog post",
-            mode: "insensitive",
-          },
-        },
-      ],
-    },
-    include: {
-      author: {
-        omit: {
-          password: true,
-        },
-      }
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+//     // // ________ Exact Searching __________________________
+//     // where: {
+//     //   AND: [
+//     //     {
+//     //       title: "My Fourth Blog Post", // Case sensitive
+//     //     },
+//     //     {
+//     //       content: "This is the full content of my blog post...",
+//     //     },
+//     //   ],
+//     // },
 
-  return posts;
-};
+//     // // ________ Partial Searching __________________________
+//     where: {
+//       OR: [
+//         {
+//           title: {
+//             contains: "My Fou",
+//             mode: "insensitive", // Not Case sensitive
+//           },
+//         },
+//         {
+//           content: {
+//             contains: "This is the full content of my blog post",
+//             mode: "insensitive",
+//           },
+//         },
+//       ],
+//     },
+//     include: {
+//       author: {
+//         omit: {
+//           password: true,
+//         },
+//       }
+//     },
+//     orderBy: {
+//       createdAt: "desc",
+//     },
+//   });
+
+//   return posts;
+// };
 
 const getMyPosts = async (userId: string) => {
   const post = await prisma.post.findMany({
@@ -606,6 +608,5 @@ export const postService = {
   updatePost,
   deletePost,
   getPostStats,
-  postSearchService,
   getPopularPosts,
 };

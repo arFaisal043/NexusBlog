@@ -18,12 +18,12 @@ const getAllPosts = catchAsync(async (req: Request, res: Response, next: NextFun
     sendSuccess(res, statusCode.OK, "All post retrieve successfully!", result);
 });
 
-const searchPosts = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    //const payload = req.body;
-    const result = await postService.postSearchService();
-    sendSuccess(res, statusCode.OK, "Searching something!", result);
-  },
-);
+// const searchPosts = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+//     //const payload = req.body;
+//     const result = await postService.postSearchService();
+//     sendSuccess(res, statusCode.OK, "Searching something!", result);
+//   },
+// );
 
 const getMyPosts = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const id = req.user?.id as string;
@@ -73,6 +73,5 @@ export const postController = {
   updatePost,
   deletePost,
   getPostStats,
-  searchPosts,
   getPopularPosts,
 };

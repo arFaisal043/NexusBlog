@@ -5,101 +5,101 @@ import { ICreateCommentPayload, IUpdateCommentPayload } from "./comment.interfac
 import statusCode from "http-status";
 
 const createComment = async (payload: ICreateCommentPayload, authorId: string) => {
-    // Check if post exists and if it's premium
-    const post = await prisma.post.findUniqueOrThrow({
-        where: { id: payload.postId }
+  // Check if post exists and if it's premium
+  const post = await prisma.post.findUniqueOrThrow({
+    where: { id: payload.postId }
+  });
+
+  if (post.isPremium) {
+    const subscription = await prisma.subscription.findUnique({
+      where: { userId: authorId },
     });
-
-    if (post.isPremium) {
-        const subscription = await prisma.subscription.findUnique({
-            where: { userId: authorId },
-        });
-        if (subscription?.status !== "ACTIVE") {
-            throw new Error("Only active premium users can comment on premium posts.");
-        }
+    if (subscription?.status !== "ACTIVE") {
+      throw new Error("Only active premium users can comment on premium posts.");
     }
+  }
 
-    const result = await prisma.comment.create({
-        data: {
-            postId: payload.postId,
-            content: payload.content,
-            authorId: authorId
-        }
-    })
+  const result = await prisma.comment.create({
+    data: {
+      postId: payload.postId,
+      content: payload.content,
+      authorId: authorId
+    }
+  })
 
-    return result;
+  return result;
 };
 
 const getCommentByAuthorId = async (authorId: string) => {
-    const comment = await prisma.comment.findMany({
-      where: {
-        authorId,
-      },
-      orderBy: {
-        createdAt: "desc"
-      }
-    });
+  const comment = await prisma.comment.findMany({
+    where: {
+      authorId,
+    },
+    orderBy: {
+      createdAt: "desc"
+    }
+  });
 
-    return comment;
+  return comment;
 };
 
 const getCommentByCommentId = async (commentId: string) => {
-    const comment = await prisma.comment.findUnique({
-        where: {
-            id: commentId
-        }
-    })
+  const comment = await prisma.comment.findUnique({
+    where: {
+      id: commentId
+    }
+  })
 
-    return comment;
+  return comment;
 };
 
 const updateComment = async (payload: IUpdateCommentPayload, commentId: string, userId: string, userRole: string) => {
-    const existingComment = await prisma.comment.findUnique({
-      where: { id: commentId }
-    });
+  const existingComment = await prisma.comment.findUnique({
+    where: { id: commentId }
+  });
 
-    if (!existingComment) {
-      throw new CustomError("Comment not found", statusCode.NOT_FOUND);
-    }
+  if (!existingComment) {
+    throw new CustomError("Comment not found", statusCode.NOT_FOUND);
+  }
 
-    if (existingComment.authorId !== userId && userRole !== Role.ADMIN) {
-      throw new CustomError("You do not have permission to update this comment", statusCode.FORBIDDEN);
-    }
+  if (existingComment.authorId !== userId && userRole !== Role.ADMIN) {
+    throw new CustomError("You do not have permission to update this comment", statusCode.FORBIDDEN);
+  }
 
-    const update = await prisma.comment.update({
-      where: {
-        id: commentId,
-      },
-      data: payload,
-    });
+  const update = await prisma.comment.update({
+    where: {
+      id: commentId,
+    },
+    data: payload,
+  });
 
-    return update;
+  return update;
 };
 
 const deleteComment = async (commentId: string, userId: string, userRole: string) => {
-    // check if comment exist or not?
-    const isCommentExist = await prisma.comment.findUnique({
-        where: {
-            id: commentId
-        }
-    })
-
-    if(!isCommentExist) {
-        throw new CustomError("Comment is not exist", statusCode.NOT_FOUND)
+  // check if comment exist or not?
+  const isCommentExist = await prisma.comment.findUnique({
+    where: {
+      id: commentId
     }
+  })
 
-    if (isCommentExist.authorId !== userId && userRole !== Role.ADMIN) {
-        throw new CustomError("You do not have permission to delete this comment", statusCode.FORBIDDEN);
+  if (!isCommentExist) {
+    throw new CustomError("Comment is not exist", statusCode.NOT_FOUND)
+  }
+
+  if (isCommentExist.authorId !== userId && userRole !== Role.ADMIN) {
+    throw new CustomError("You do not have permission to delete this comment", statusCode.FORBIDDEN);
+  }
+
+  // if exist then delete
+  const result = await prisma.comment.delete({
+    where: {
+      id: commentId
     }
+  })
 
-    // if exist then delete
-    const result = await prisma.comment.delete({
-        where: {
-            id: commentId
-        }
-    })
-
-    return result;
+  return result;
 };
 
 const moderateComment = async (
@@ -122,10 +122,10 @@ const moderateComment = async (
 };
 
 export const commentServices = {
-    createComment,
-    getCommentByAuthorId,
-    getCommentByCommentId,
-    updateComment,
-    deleteComment,
-    moderateComment
+  createComment,
+  getCommentByAuthorId,
+  getCommentByCommentId,
+  updateComment,
+  deleteComment,
+  moderateComment
 }

@@ -11,7 +11,7 @@ router.post("/", authMiddleware(Role.ADMIN, Role.USER, Role.AUTHOR), validateReq
 
 router.get("/", postController.getAllPosts);
 
-router.get("/search", postController.searchPosts); // for practicing
+// router.get("/search", postController.searchPosts); // for practicing
 
 router.get("/my-post", authMiddleware(Role.ADMIN, Role.USER, Role.AUTHOR), postController.getMyPosts);
 
