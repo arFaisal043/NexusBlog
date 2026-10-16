@@ -27,7 +27,7 @@ The API is engineered for security and scalability — featuring JWT-based authe
 ---
 
 ## ✅ NexusBlog System Design
-![System Design](C:\Users\USER\Desktop\NexusBlog\NexusBlog_System_Design.png)
+![System Design](NexusBlog_System_Design.png)
 
 ## 🏅 Badges
 
